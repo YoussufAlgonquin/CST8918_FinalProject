@@ -1,0 +1,51 @@
+name: Terraform Apply
+
+# Runs when infra changes are merged to main (i.e. an infra PR was
+# approved and merged). Applies both environments.
+#
+# TODO(owner): this needs infra/tf-backend applied and the Azure
+# federated identity + repo secrets (AZURE_CLIENT_ID, AZURE_TENANT_ID,
+# AZURE_SUBSCRIPTION_ID, ARM_ACCESS_KEY) before it can run for real. See
+# docs/task-breakdown.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply:
+    name: apply
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        environment: [test, prod]
+    environment: ${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.8'
+
+      - name: terraform init
+        working-directory: infra/envs/${{ matrix.environment }}
+        run: terraform init
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
+
+      - name: terraform apply
+        working-directory: infra/envs/${{ matrix.environment }}
+        run: terraform apply -auto-approve -input=false

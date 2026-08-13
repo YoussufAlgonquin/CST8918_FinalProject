@@ -1,0 +1,83 @@
+name: Terraform PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  tflint:
+    name: tflint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        working-directory:
+          - infra/tf-backend
+          - infra/modules/network
+          - infra/modules/aks
+          - infra/modules/weather-app
+          - infra/envs/test
+          - infra/envs/prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: tflint --init
+        working-directory: ${{ matrix.working-directory }}
+        run: tflint --init --config="${{ github.workspace }}/.tflint.hcl"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: tflint
+        working-directory: ${{ matrix.working-directory }}
+        run: tflint --config="${{ github.workspace }}/.tflint.hcl"
+
+  # NOTE: this job is wired up but NOT yet a required status check in the
+  # main branch ruleset. It needs:
+  #   1. infra/tf-backend applied (real storage account for state)
+  #   2. Azure federated identities + repo secrets (AZURE_CLIENT_ID,
+  #      AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID) - see assignment's
+  #      "Automate Workflows" section.
+  # Until then it will fail on every PR, so it's deliberately left out of
+  # the required checks to avoid blocking merges. Add it back to the
+  # ruleset once the secrets above exist.
+  terraform-plan:
+    name: terraform-plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [test, prod]
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.8'
+
+      - name: terraform init
+        working-directory: infra/envs/${{ matrix.environment }}
+        run: terraform init
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
+
+      - name: terraform plan
+        working-directory: infra/envs/${{ matrix.environment }}
+        run: terraform plan -input=false -no-color
