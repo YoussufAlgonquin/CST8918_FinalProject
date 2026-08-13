@@ -28,3 +28,5 @@ Already working today (no cloud credentials required):
 
 - `static-tests.yml` - `terraform fmt`, `terraform validate`, `tfsec` on every push to any branch.
 - `pr-checks.yml` - `tflint` on every PR to `main` (the `terraform-plan` job in the same file is a stub, see #9).
+
+Verified end-to-end via [PR #1](../../pull/1): static tests, and tflint all ran and passed on a real pull request to `main`.
