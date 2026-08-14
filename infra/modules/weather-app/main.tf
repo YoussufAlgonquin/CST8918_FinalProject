@@ -46,14 +46,6 @@ resource "azurerm_redis_cache" "this" {
   minimum_tls_version   = "1.2"
 }
 
-# --- Kubernetes provider ---
-provider "kubernetes" {
-  host                   = var.aks_host
-  client_certificate     = base64decode(var.aks_client_certificate)
-  client_key             = base64decode(var.aks_client_key)
-  cluster_ca_certificate = base64decode(var.aks_cluster_ca_certificate)
-}
-
 # --- Namespace per environment, keeps test/prod objects separated in-cluster ---
 resource "kubernetes_namespace" "this" {
   metadata {
