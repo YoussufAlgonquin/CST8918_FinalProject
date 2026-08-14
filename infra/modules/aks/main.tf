@@ -15,7 +15,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     name                = "default"
     vm_size             = var.vm_size
     vnet_subnet_id      = var.subnet_id
-    enable_auto_scaling = var.enable_auto_scaling
+    auto_scaling_enabled = var.enable_auto_scaling
 
     # Only one of (node_count) or (min_count/max_count) actually takes
     # effect depending on enable_auto_scaling, but azurerm accepts
