@@ -50,6 +50,22 @@ resource "azurerm_storage_account" "tfstate" {
 
   blob_properties {
     versioning_enabled = true
+
+    # Protects the tfstate container from deletion (e.g. dropped from
+    # config, or a "container already exists" retry gone wrong) -
+    # versioning above only protects against a blob being overwritten,
+    # not the container itself disappearing.
+    container_delete_retention_policy {
+      days = 7
+    }
+  }
+
+  # This one account backs both test.terraform.tfstate and
+  # prod.terraform.tfstate - a ForceNew change (e.g. account_tier) or an
+  # accidental removal from config would destroy both environments'
+  # state in a single apply.
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
@@ -57,4 +73,8 @@ resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
   storage_account_id    = azurerm_storage_account.tfstate.id
   container_access_type = "private"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
