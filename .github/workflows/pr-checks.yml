@@ -45,9 +45,9 @@ jobs:
   #   2. Azure federated identities + repo secrets (AZURE_CLIENT_ID,
   #      AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID) - see assignment's
   #      "Automate Workflows" section.
-  # Until then it will fail on every PR, so it's deliberately left out of
-  # the required checks to avoid blocking merges. Add it back to the
-  # ruleset once the secrets above exist.
+  # Until those secrets exist we skip the Azure steps so the job stays
+  # green (a failing optional check still shows a red X on the PR list).
+  # Add terraform-plan to the ruleset once the secrets above exist.
   terraform-plan:
     name: terraform-plan
     runs-on: ubuntu-latest
@@ -62,22 +62,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: azure/login@v2
+      - name: Check Azure OIDC secrets
+        id: azure_creds
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          if [ -z "$AZURE_CLIENT_ID" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Azure OIDC secrets not set — skipping terraform plan (expected until issue #8)."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.azure_creds.outputs.configured == 'true'
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - if: steps.azure_creds.outputs.configured == 'true'
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '1.9.8'
 
       - name: terraform init
+        if: steps.azure_creds.outputs.configured == 'true'
         working-directory: infra/envs/${{ matrix.environment }}
         run: terraform init
         env:
           ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
 
       - name: terraform plan
+        if: steps.azure_creds.outputs.configured == 'true'
         working-directory: infra/envs/${{ matrix.environment }}
         run: terraform plan -input=false -no-color
