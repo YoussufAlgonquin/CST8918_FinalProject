@@ -1,24 +1,27 @@
 terraform {
-  required_version = ">= 1.9"
+  required_version = ">= 1.7"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"
+      version = "~> 3.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.30"
+      version = "~> 2.25"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
     }
   }
 
-  # TODO(owner): fill in once infra/tf-backend is applied. Storage account
-  # name/container are looked up from the backend outputs; access key is
-  # supplied via ARM_ACCESS_KEY in CI, not committed here.
+  # Same storage account as prod, different state key.
   backend "azurerm" {
-    resource_group_name  = ""
-    storage_account_name = ""
-    container_name       = "tfstate"
-    key                  = "test.terraform.tfstate"
+    resource_group_name = "" # <- tf-backend output: backend_resource_group_name
+    storage_account_name = "" # <- tf-backend output: backend_storage_account_name
+    container_name        = "tfstate"
+    key                    = "test.tfstate"
   }
 }
 
