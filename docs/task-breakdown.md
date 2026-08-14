@@ -11,13 +11,13 @@ yet.
 
 | # | Task | Where | Status |
 |---|------|-------|--------|
-| 1 | Terraform backend: resource group, storage account, blob container | `infra/tf-backend` | Not started |
-| 2 | Network module: resource group, VNet (10.0.0.0/14), 4 subnets | `infra/modules/network` | Not started |
-| 3 | AKS module: cluster resource, node pool (fixed vs. autoscaling) | `infra/modules/aks` | Not started |
-| 4 | Weather-app module: ACR, Redis cache, k8s deployment/service | `infra/modules/weather-app` | In progress (see PR) |
-| 5 | Wire up `infra/envs/test` root module (calls network + aks + weather-app) | `infra/envs/test` | Not started |
-| 6 | Wire up `infra/envs/prod` root module | `infra/envs/prod` | Not started |
-| 7 | Copy in the Week 3 Remix Weather App + Dockerfile | `app/` | Not started |
+| 1 | Terraform backend: resource group, storage account, blob container | `infra/tf-backend` | In review ([#2](../../issues/2) / PR #13) |
+| 2 | Network module: resource group, VNet (10.0.0.0/14), 4 subnets | `infra/modules/network` | In review ([#3](../../issues/3) / PR #13) |
+| 3 | AKS module: cluster resource, node pool (fixed vs. autoscaling) | `infra/modules/aks` | In review ([#4](../../issues/4) / PR #14) |
+| 4 | Weather-app module: ACR, Redis cache, k8s deployment/service | `infra/modules/weather-app` | In progress ([#5](../../issues/5)) |
+| 5 | Wire up `infra/envs/test` root module (calls network + aks + weather-app) | `infra/envs/test` | In progress ([#6](../../issues/6)) |
+| 6 | Wire up `infra/envs/prod` root module | `infra/envs/prod` | In progress ([#6](../../issues/6)) |
+| 7 | Copy in the Week 3 Remix Weather App + Dockerfile | `app/` | In review ([#7](../../issues/7) / PR #15) |
 | 8 | Azure federated identities (OIDC) for GitHub Actions + repo/environment secrets | Azure + repo Settings | Not started |
 | 9 | Complete `terraform-plan` job in `pr-checks.yml` once #1 and #8 are done, then add it as a required status check in the ruleset | `.github/workflows/pr-checks.yml` | Blocked on #1, #8 |
 | 10 | Complete `infra-apply.yml` (apply on merge to main) | `.github/workflows/infra-apply.yml` | Blocked on #1, #8 |
