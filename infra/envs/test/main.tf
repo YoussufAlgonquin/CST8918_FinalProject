@@ -1,6 +1,77 @@
-# Root module for the test environment. Wires together the network, aks,
-# and weather-app modules for env = "test".
+# Root module for the test environment.
 #
-# TODO(owner): call infra/modules/network, infra/modules/aks (1 fixed
-# node), and infra/modules/weather-app (env = "test") with the "test"
-# subnet (10.1.0.0/16).
+# Owns the shared network (one VNet / four subnets for the whole project)
+# plus the test AKS cluster, shared ACR, test Redis, and k8s workload.
+# Prod reads network + ACR outputs from this state via terraform_remote_state.
+
+module "network" {
+  source = "../../modules/network"
+
+  resource_group_name = "cst8918-final-project-group-${var.group_number}"
+  location            = var.location
+}
+
+module "aks" {
+  source = "../../modules/aks"
+
+  cluster_name        = "cst8918-g${var.group_number}-test-aks"
+  resource_group_name = module.network.resource_group_name
+  location            = var.location
+  subnet_id           = module.network.subnet_ids["test"]
+  kubernetes_version  = "1.32"
+  vm_size             = "Standard_B2s"
+  enable_auto_scaling = false
+  node_count          = 1
+}
+
+provider "kubernetes" {
+  host                   = module.aks.kube_config[0].host
+  client_certificate     = base64decode(module.aks.kube_config[0].client_certificate)
+  client_key             = base64decode(module.aks.kube_config[0].client_key)
+  cluster_ca_certificate = base64decode(module.aks.kube_config[0].cluster_ca_certificate)
+}
+
+module "weather_app" {
+  source = "../../modules/weather-app"
+
+  environment                = "test"
+  resource_group_name        = module.network.resource_group_name
+  location                   = var.location
+  create_acr                 = true
+  acr_name                   = var.acr_name
+  kubelet_identity_object_id = module.aks.kubelet_identity_object_id
+  weather_api_key            = var.weather_api_key
+  app_replicas               = 1
+}
+
+output "resource_group_name" {
+  value = module.network.resource_group_name
+}
+
+output "subnet_ids" {
+  value = module.network.subnet_ids
+}
+
+output "aks_cluster_name" {
+  value = "cst8918-g${var.group_number}-test-aks"
+}
+
+output "acr_id" {
+  value = module.weather_app.acr_id
+}
+
+output "acr_name" {
+  value = module.weather_app.acr_name
+}
+
+output "acr_login_server" {
+  value = module.weather_app.acr_login_server
+}
+
+output "redis_hostname" {
+  value = module.weather_app.redis_hostname
+}
+
+output "weather_app_service_ip" {
+  value = module.weather_app.service_ip
+}
