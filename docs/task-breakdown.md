@@ -13,7 +13,7 @@ yet.
 |---|------|-------|--------|
 | 1 | Terraform backend: resource group, storage account, blob container | `infra/tf-backend` | Not started |
 | 2 | Network module: resource group, VNet (10.0.0.0/14), 4 subnets | `infra/modules/network` | Not started |
-| 3 | AKS module: cluster resource, node pool (fixed vs. autoscaling) | `infra/modules/aks` | Not started |
+| 3 | AKS module: cluster resource, node pool (fixed vs. autoscaling) | `infra/modules/aks` | In review ([#4](../../issues/4)) |
 | 4 | Weather-app module: ACR, Redis cache, k8s deployment/service | `infra/modules/weather-app` | Not started |
 | 5 | Wire up `infra/envs/test` root module (calls network + aks + weather-app) | `infra/envs/test` | Not started |
 | 6 | Wire up `infra/envs/prod` root module | `infra/envs/prod` | Not started |
