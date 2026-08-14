@@ -11,13 +11,13 @@ yet.
 
 | # | Task | Where | Status |
 |---|------|-------|--------|
-| 1 | Terraform backend: resource group, storage account, blob container | `infra/tf-backend` | In review ([#13](../../pull/13)) |
-| 2 | Network module: resource group, VNet (10.0.0.0/14), 4 subnets | `infra/modules/network` | In review ([#13](../../pull/13)) - see PR comments on how envs should consume it |
-| 3 | AKS module: cluster resource, node pool (fixed vs. autoscaling) | `infra/modules/aks` | In review ([#14](../../pull/14)) |
-| 4 | Weather-app module: ACR, Redis cache, k8s deployment/service | `infra/modules/weather-app` | In progress (Faiza, issue [#5](../../issues/5)) |
-| 5 | Wire up `infra/envs/test` root module (calls network + aks + weather-app) | `infra/envs/test` | Not started - blocked on #1-#4 merging |
-| 6 | Wire up `infra/envs/prod` root module | `infra/envs/prod` | Not started - blocked on #1-#4 merging |
-| 7 | Copy in the Week 3 Remix Weather App + Dockerfile | `app/` | In review - wired to read Redis from env vars (falls back to in-memory when unset), `skipLibCheck` added to fix an unrelated `tsc`/vite type conflict |
+| 1 | Terraform backend: resource group, storage account, blob container | `infra/tf-backend` | Done ([#13](../../pull/13)) |
+| 2 | Network module: resource group, VNet (10.0.0.0/14), 4 subnets | `infra/modules/network` | Done ([#13](../../pull/13)) - see PR comments on how envs should consume it |
+| 3 | AKS module: cluster resource, node pool (fixed vs. autoscaling) | `infra/modules/aks` | Done ([#14](../../pull/14)) |
+| 4 | Weather-app module: ACR, Redis cache, k8s deployment/service | `infra/modules/weather-app` | In review (Faiza, [#17](../../pull/17)) - see review comments |
+| 5 | Wire up `infra/envs/test` root module (calls network + aks + weather-app) | `infra/envs/test` | In review ([#18](../../pull/18)) - see review comments; author notes it bundles module code temporarily so `validate` passes standalone, will shrink after #4/#17 merge |
+| 6 | Wire up `infra/envs/prod` root module | `infra/envs/prod` | In review ([#18](../../pull/18)) - same as #5 |
+| 7 | Copy in the Week 3 Remix Weather App + Dockerfile | `app/` | Done (this PR) - wired to read Redis from env vars (falls back to in-memory when unset), `skipLibCheck` added to fix an unrelated `tsc`/vite type conflict |
 | 8 | Azure federated identities (OIDC) for GitHub Actions + repo/environment secrets | Azure + repo Settings | Not started |
 | 9 | Complete `terraform-plan` job in `pr-checks.yml` once #1 and #8 are done, then add it as a required status check in the ruleset | `.github/workflows/pr-checks.yml` | Blocked on #1, #8 |
 | 10 | Complete `infra-apply.yml` (apply on merge to main) | `.github/workflows/infra-apply.yml` | Blocked on #1, #8 |
