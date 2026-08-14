@@ -10,7 +10,7 @@ Terraform remote state in Azure Blob Storage and CI/CD via GitHub Actions.
 - Youssuf ([@YoussufAlgonquin](https://github.com/YoussufAlgonquin))
 - Muhannad Jaber ([@muhannadj27](https://github.com/muhannadj27))
 - Faiza ([@Faiza2201](https://github.com/Faiza2201))
-- Idris Jovial Sop ([@sopn0001] (https://github.com/sopn0001))
+- Idris Jovial Sop ([@sopn0001](https://github.com/sopn0001))
 
 ## Project structure
 
