@@ -51,3 +51,8 @@ jobs:
         with:
           working_directory: infra
           soft_fail: false
+          # Without this, the action's own version-check call to the GitHub
+          # API is anonymous and shares runner IPs with everyone else on
+          # GitHub-hosted runners - it gets rate-limited intermittently,
+          # failing this required check for reasons unrelated to our code.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
