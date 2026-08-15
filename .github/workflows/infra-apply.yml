@@ -1,12 +1,8 @@
 name: Terraform Apply
 
 # Runs when infra changes are merged to main (i.e. an infra PR was
-# approved and merged). Applies both environments.
-#
-# TODO(owner): this needs infra/tf-backend applied and the Azure
-# federated identity + repo secrets (AZURE_CLIENT_ID, AZURE_TENANT_ID,
-# AZURE_SUBSCRIPTION_ID, ARM_ACCESS_KEY) before it can run for real. See
-# docs/task-breakdown.md.
+# approved and merged). Applies both environments, test then prod
+# (max-parallel: 1, since prod reads test's remote state).
 
 on:
   push:

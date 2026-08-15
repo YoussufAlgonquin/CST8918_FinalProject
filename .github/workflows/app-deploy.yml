@@ -2,11 +2,7 @@ name: Deploy Weather App
 
 # Deploys the Remix Weather App to AKS, only when app code changes:
 #   - pull_request to main  -> test environment (for PR review)
-#   - push to main (merge)  -> production environment
-#
-# TODO(owner): needs the AKS clusters + k8s deployment/service from
-# infra/modules/weather-app to exist, and AKS_CLUSTER_NAME / RESOURCE_GROUP
-# secrets or vars configured. See docs/task-breakdown.md.
+#   - push to main (merge)  -> prod environment
 
 on:
   pull_request:
