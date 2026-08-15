@@ -39,12 +39,11 @@ jobs:
         working-directory: ${{ matrix.working-directory }}
         run: tflint --config="${{ github.workspace }}/.tflint.hcl"
 
-  # Needs both:
-  #   1. infra/tf-backend applied + ARM_ACCESS_KEY secret
-  #   2. Azure OIDC secrets (AZURE_CLIENT_ID / TENANT_ID / SUBSCRIPTION_ID)
-  # Until ALL four are set, the plan job skips with an explicit notice so
-  # the PR list stays green. Not a required status check yet — add it to
-  # the ruleset once issue #8 is done and this job actually plans.
+  # Live against real Azure state via the cst8918fp-gha-r identity (Reader
+  # + Azure Kubernetes Service Cluster User Role + Redis Cache Contributor
+  # - Reader alone can't refresh AKS/Redis state, since listing credentials
+  # and cache keys aren't included in it). If the four secrets below are
+  # ever unset, the job skips cleanly instead of failing.
   terraform-plan:
     name: terraform-plan
     runs-on: ubuntu-latest
