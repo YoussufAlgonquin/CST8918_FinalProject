@@ -3,8 +3,11 @@ name: Build and Push Weather App Image
 # Builds the Remix Weather App and pushes it to ACR, tagged with the
 # commit SHA, only when app code changes and only on PRs to main.
 #
-# TODO(owner): needs the ACR from infra/modules/weather-app to exist, and
-# ACR_NAME / Azure login secrets configured. See docs/task-breakdown.md.
+# Uses ACR_PUSH_CLIENT_ID rather than the repo-level AZURE_CLIENT_ID:
+# this job needs AcrPush (write), while the repo-level identity is
+# Reader-only (used by pr-checks.yml's plan job). There's no natural
+# GitHub Environment for a build-only job, so this gets its own secret
+# instead of an environment override.
 
 on:
   pull_request:
@@ -25,7 +28,7 @@ jobs:
 
       - uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-id: ${{ secrets.ACR_PUSH_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 

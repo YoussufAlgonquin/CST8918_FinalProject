@@ -31,8 +31,11 @@ locals {
   acr_login_server = var.create_acr ? azurerm_container_registry.this[0].login_server : var.acr_login_server
   # Bootstrap image until the first CI build pushes weather-app:<sha>; the
   # deployment ignores subsequent image changes so app-deploy.yml can roll
-  # out new tags without Terraform reverting them.
-  container_image = var.container_image != "" ? var.container_image : "mcr.microsoft.com/oss/nginx/nginx:1.25"
+  # out new tags without Terraform reverting them. Uses the unprivileged
+  # nginx variant because it listens on 8080 by default, matching the real
+  # app's containerPort/readinessProbe - plain nginx listens on 80 and
+  # would never pass the readiness probe below.
+  container_image = var.container_image != "" ? var.container_image : "nginxinc/nginx-unprivileged:1.25"
   app_labels = {
     app         = "weather-app"
     environment = var.environment
