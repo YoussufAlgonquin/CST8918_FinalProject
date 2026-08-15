@@ -49,3 +49,5 @@ jobs:
       - name: terraform apply
         working-directory: infra/envs/${{ matrix.environment }}
         run: terraform apply -auto-approve -input=false
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
