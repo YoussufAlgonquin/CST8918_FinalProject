@@ -3,6 +3,11 @@ output "cluster_id" {
   value       = azurerm_kubernetes_cluster.this.id
 }
 
+output "cluster_name" {
+  description = "Name of the AKS cluster"
+  value       = azurerm_kubernetes_cluster.this.name
+}
+
 output "kube_config_raw" {
   description = "Raw kubeconfig for the cluster, used to configure the kubernetes provider in infra/modules/weather-app"
   value       = azurerm_kubernetes_cluster.this.kube_config_raw

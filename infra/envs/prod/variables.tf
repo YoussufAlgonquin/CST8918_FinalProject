@@ -9,11 +9,8 @@ variable "group_number" {
   }
 }
 
-variable "location" {
-  description = "Azure region for production-environment resources"
-  type        = string
-  default     = "canadacentral"
-}
+# Location is taken from test remote state (network VNet region), not a
+# separate prod variable — AKS must live in the same region as its subnet.
 
 variable "weather_api_key" {
   description = "OpenWeatherMap API key for the Remix weather app"

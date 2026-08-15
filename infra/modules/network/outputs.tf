@@ -3,6 +3,11 @@ output "resource_group_name" {
   value       = azurerm_resource_group.this.name
 }
 
+output "location" {
+  description = "Azure region of the resource group / VNet (prod must use this for AKS in the shared VNet)"
+  value       = azurerm_resource_group.this.location
+}
+
 output "vnet_id" {
   description = "ID of the virtual network"
   value       = azurerm_virtual_network.this.id

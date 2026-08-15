@@ -97,3 +97,8 @@ jobs:
         if: steps.azure_creds.outputs.configured == 'true'
         working-directory: infra/envs/${{ matrix.environment }}
         run: terraform plan -input=false -no-color
+        env:
+          # Required again at plan time: azurerm backend credentials are not
+          # persisted after init. Prod also reads test remote state, so plan
+          # authenticates to two backends.
+          ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}

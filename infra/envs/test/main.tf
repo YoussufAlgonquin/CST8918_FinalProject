@@ -3,6 +3,17 @@
 # Owns the shared network (one VNet / four subnets for the whole project)
 # plus the test AKS cluster, shared ACR, test Redis, and k8s workload.
 # Prod reads network + ACR outputs from this state via terraform_remote_state.
+#
+# First-time apply (empty subscription / no cluster yet): the kubernetes
+# provider below depends on module.aks.kube_config, which is only known
+# after the cluster exists. Run a two-step apply:
+#   terraform apply -target=module.network -target=module.aks
+#   terraform apply
+# Subsequent applies are a single `terraform apply`.
+
+locals {
+  aks_cluster_name = "cst8918-g${var.group_number}-test-aks"
+}
 
 module "network" {
   source = "../../modules/network"
@@ -14,9 +25,9 @@ module "network" {
 module "aks" {
   source = "../../modules/aks"
 
-  cluster_name        = "cst8918-g${var.group_number}-test-aks"
+  cluster_name        = local.aks_cluster_name
   resource_group_name = module.network.resource_group_name
-  location            = var.location
+  location            = module.network.location
   subnet_id           = module.network.subnet_ids["test"]
   kubernetes_version  = "1.32"
   vm_size             = "Standard_B2s"
@@ -36,7 +47,7 @@ module "weather_app" {
 
   environment                = "test"
   resource_group_name        = module.network.resource_group_name
-  location                   = var.location
+  location                   = module.network.location
   create_acr                 = true
   acr_name                   = var.acr_name
   kubelet_identity_object_id = module.aks.kubelet_identity_object_id
@@ -48,12 +59,16 @@ output "resource_group_name" {
   value = module.network.resource_group_name
 }
 
+output "location" {
+  value = module.network.location
+}
+
 output "subnet_ids" {
   value = module.network.subnet_ids
 }
 
 output "aks_cluster_name" {
-  value = "cst8918-g${var.group_number}-test-aks"
+  value = module.aks.cluster_name
 }
 
 output "acr_id" {

@@ -3,6 +3,18 @@
 # Does NOT recreate the shared network or ACR — those live in the test
 # root module's state (single VNet with prod/test/dev/admin subnets, one
 # registry for both environments). Apply test before prod.
+#
+# First-time apply (no prod cluster yet): the kubernetes provider below
+# depends on module.aks.kube_config, which is only known after the
+# cluster exists. Run a two-step apply:
+#   terraform apply -target=module.aks
+#   terraform apply
+# Subsequent applies are a single `terraform apply`. Location for AKS /
+# Redis comes from test remote state so it always matches the VNet region.
+
+locals {
+  aks_cluster_name = "cst8918-g${var.group_number}-prod-aks"
+}
 
 data "terraform_remote_state" "test" {
   backend = "azurerm"
@@ -17,9 +29,9 @@ data "terraform_remote_state" "test" {
 module "aks" {
   source = "../../modules/aks"
 
-  cluster_name        = "cst8918-g${var.group_number}-prod-aks"
+  cluster_name        = local.aks_cluster_name
   resource_group_name = data.terraform_remote_state.test.outputs.resource_group_name
-  location            = var.location
+  location            = data.terraform_remote_state.test.outputs.location
   subnet_id           = data.terraform_remote_state.test.outputs.subnet_ids["prod"]
   kubernetes_version  = "1.32"
   vm_size             = "Standard_B2s"
@@ -40,7 +52,7 @@ module "weather_app" {
 
   environment                = "prod"
   resource_group_name        = data.terraform_remote_state.test.outputs.resource_group_name
-  location                   = var.location
+  location                   = data.terraform_remote_state.test.outputs.location
   create_acr                 = false
   acr_id                     = data.terraform_remote_state.test.outputs.acr_id
   acr_login_server           = data.terraform_remote_state.test.outputs.acr_login_server
@@ -54,7 +66,7 @@ output "resource_group_name" {
 }
 
 output "aks_cluster_name" {
-  value = "cst8918-g${var.group_number}-prod-aks"
+  value = module.aks.cluster_name
 }
 
 output "acr_login_server" {

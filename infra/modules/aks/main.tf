@@ -43,8 +43,14 @@ resource "azurerm_kubernetes_cluster" "this" {
     type = "SystemAssigned"
   }
 
+  # service_cidr / dns_service_ip / pod_cidr must sit OUTSIDE the shared
+  # VNet (10.0.0.0/14). Azure's kubenet defaults use service_cidr =
+  # 10.0.0.0/16, which collides with the prod subnet (also 10.0.0.0/16).
   network_profile {
     network_plugin = "kubenet"
     network_policy = "calico"
+    service_cidr   = var.service_cidr
+    dns_service_ip = var.dns_service_ip
+    pod_cidr       = var.pod_cidr
   }
 }
