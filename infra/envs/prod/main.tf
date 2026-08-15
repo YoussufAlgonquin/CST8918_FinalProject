@@ -33,7 +33,6 @@ module "aks" {
   resource_group_name = data.terraform_remote_state.test.outputs.resource_group_name
   location            = data.terraform_remote_state.test.outputs.location
   subnet_id           = data.terraform_remote_state.test.outputs.subnet_ids["prod"]
-  vm_size             = "Standard_B2s"
   enable_auto_scaling = true
   min_node_count      = 1
   max_node_count      = 3
