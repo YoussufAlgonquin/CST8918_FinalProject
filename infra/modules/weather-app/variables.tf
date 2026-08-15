@@ -82,6 +82,17 @@ variable "container_image" {
   default     = ""
 }
 
+variable "service_type" {
+  description = "Defaults to LoadBalancer. Azure for Students caps public IPs per region (3 in this subscription); with both AKS clusters' own outbound IP plus one LoadBalancer service already at the limit, one environment may need ClusterIP instead."
+  type        = string
+  default     = "LoadBalancer"
+
+  validation {
+    condition     = contains(["LoadBalancer", "ClusterIP"], var.service_type)
+    error_message = "service_type must be \"LoadBalancer\" or \"ClusterIP\"."
+  }
+}
+
 variable "weather_api_key" {
   description = "OpenWeatherMap API key injected into the weather-app secret"
   type        = string

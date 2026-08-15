@@ -191,7 +191,7 @@ resource "kubernetes_service" "weather_app" {
       target_port = 8080
     }
 
-    type = "LoadBalancer"
+    type = var.service_type
   }
 
   depends_on = [kubernetes_deployment.weather_app]

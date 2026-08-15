@@ -57,6 +57,11 @@ module "weather_app" {
   kubelet_identity_object_id = module.aks.kubelet_identity_object_id
   weather_api_key            = var.weather_api_key
   app_replicas               = 2
+  # ClusterIP: this subscription's 3-public-IP-per-region cap is already
+  # spent (each AKS cluster's own outbound IP + test's app service). See
+  # infra/modules/weather-app/variables.tf. Reachable via kubectl
+  # port-forward or `kubectl exec` until the quota allows a public IP.
+  service_type = "ClusterIP"
 }
 
 output "resource_group_name" {
