@@ -71,7 +71,7 @@ resource "kubernetes_secret" "weather_app" {
   data = {
     WEATHER_API_KEY = var.openweather_api_key
     REDIS_HOST      = azurerm_redis_cache.this.hostname
-    REDIS_PORT      = azurerm_redis_cache.this.ssl_port
+    REDIS_PORT = tostring(azurerm_redis_cache.this.ssl_port)
     REDIS_PASSWORD  = azurerm_redis_cache.this.primary_access_key
     REDIS_TLS       = "true"
   }
@@ -143,6 +143,9 @@ resource "kubernetes_deployment" "weather_app" {
   }
 
   depends_on = [azurerm_role_assignment.aks_acr_pull]
+  lifecycle {
+  ignore_changes = [spec[0].template[0].spec[0].container[0].image]
+}
 }
 
 resource "kubernetes_service" "weather_app" {
