@@ -29,7 +29,6 @@ module "aks" {
   resource_group_name = module.network.resource_group_name
   location            = module.network.location
   subnet_id           = module.network.subnet_ids["test"]
-  kubernetes_version  = "1.32"
   vm_size             = "Standard_B2s"
   enable_auto_scaling = false
   node_count          = 1
