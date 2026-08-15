@@ -39,15 +39,12 @@ jobs:
         working-directory: ${{ matrix.working-directory }}
         run: tflint --config="${{ github.workspace }}/.tflint.hcl"
 
-  # NOTE: this job is wired up but NOT yet a required status check in the
-  # main branch ruleset. It needs:
-  #   1. infra/tf-backend applied (real storage account for state)
-  #   2. Azure federated identities + repo secrets (AZURE_CLIENT_ID,
-  #      AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID) - see assignment's
-  #      "Automate Workflows" section.
-  # Until those secrets exist we skip the Azure steps so the job stays
-  # green (a failing optional check still shows a red X on the PR list).
-  # Add terraform-plan to the ruleset once the secrets above exist.
+  # Needs both:
+  #   1. infra/tf-backend applied + ARM_ACCESS_KEY secret
+  #   2. Azure OIDC secrets (AZURE_CLIENT_ID / TENANT_ID / SUBSCRIPTION_ID)
+  # Until ALL four are set, the plan job skips with an explicit notice so
+  # the PR list stays green. Not a required status check yet — add it to
+  # the ruleset once issue #8 is done and this job actually plans.
   terraform-plan:
     name: terraform-plan
     runs-on: ubuntu-latest
@@ -62,38 +59,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check Azure OIDC secrets
-        id: azure_creds
+      - name: Check plan prerequisites
+        id: plan_ready
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
         run: |
-          if [ -z "$AZURE_CLIENT_ID" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "Azure OIDC secrets not set — skipping terraform plan (expected until issue #8)."
+          missing=()
+          [ -z "$AZURE_CLIENT_ID" ] && missing+=("AZURE_CLIENT_ID")
+          [ -z "$AZURE_TENANT_ID" ] && missing+=("AZURE_TENANT_ID")
+          [ -z "$AZURE_SUBSCRIPTION_ID" ] && missing+=("AZURE_SUBSCRIPTION_ID")
+          [ -z "$ARM_ACCESS_KEY" ] && missing+=("ARM_ACCESS_KEY")
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=terraform-plan skipped::Missing secrets: ${missing[*]}. Expected until issue #8 — plan not run."
           else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "All required secrets present — running terraform plan for ${{ matrix.environment }}."
           fi
 
-      - if: steps.azure_creds.outputs.configured == 'true'
+      - name: Skipped (secrets incomplete)
+        if: steps.plan_ready.outputs.ready != 'true'
+        run: echo "No terraform plan executed for this matrix entry."
+
+      - if: steps.plan_ready.outputs.ready == 'true'
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - if: steps.azure_creds.outputs.configured == 'true'
+      - if: steps.plan_ready.outputs.ready == 'true'
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '1.9.8'
 
       - name: terraform init
-        if: steps.azure_creds.outputs.configured == 'true'
+        if: steps.plan_ready.outputs.ready == 'true'
         working-directory: infra/envs/${{ matrix.environment }}
         run: terraform init
         env:
           ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
 
       - name: terraform plan
-        if: steps.azure_creds.outputs.configured == 'true'
+        if: steps.plan_ready.outputs.ready == 'true'
         working-directory: infra/envs/${{ matrix.environment }}
         run: terraform plan -input=false -no-color
+        env:
+          # Backend credentials are not persisted after init.
+          ARM_ACCESS_KEY: ${{ secrets.ARM_ACCESS_KEY }}
