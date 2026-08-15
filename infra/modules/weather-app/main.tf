@@ -10,9 +10,14 @@ resource "random_string" "acr_suffix" {
 # credentials are disabled on purpose: the AKS kubelet identity gets
 # AcrPull via role assignment instead, so no ACR username/password
 # ever needs to exist as a secret.
+locals {
+  acr_name_raw = lower(replace("acr${var.resource_group_name}${var.manage_acr ? random_string.acr_suffix[0].result : ""}", "-", ""))
+  acr_name     = substr(local.acr_name_raw, 0, 50)
+}
+
 resource "azurerm_container_registry" "this" {
   count               = var.manage_acr ? 1 : 0
-  name                = "acr${replace(var.prefix, "-", "")}${random_string.acr_suffix[0].result}"
+  name                = local.acr_name
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "Basic"
