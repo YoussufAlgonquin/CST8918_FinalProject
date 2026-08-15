@@ -24,8 +24,9 @@ variable "kubernetes_version" {
 }
 
 variable "vm_size" {
-  type    = string
-  default = "Standard_B2s"
+  description = "Assignment spec says Standard_B2s, but that generation isn't in this subscription's allowed SKU list for canadacentral (Azure for Students restriction) - Standard_B2s_v2 is the same burstable B-series size, just the allowed generation."
+  type        = string
+  default     = "Standard_B2s_v2"
 }
 
 variable "enable_auto_scaling" {
