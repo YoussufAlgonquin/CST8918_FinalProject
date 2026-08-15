@@ -50,3 +50,22 @@ variable "max_node_count" {
   type        = number
   default     = 3
 }
+
+# Must not overlap the shared VNet address space (10.0.0.0/14).
+variable "service_cidr" {
+  description = "Kubernetes service CIDR (outside the VNet)"
+  type        = string
+  default     = "172.16.0.0/16"
+}
+
+variable "dns_service_ip" {
+  description = "DNS service IP within service_cidr"
+  type        = string
+  default     = "172.16.0.10"
+}
+
+variable "pod_cidr" {
+  description = "kubenet pod CIDR (outside the VNet)"
+  type        = string
+  default     = "172.17.0.0/16"
+}

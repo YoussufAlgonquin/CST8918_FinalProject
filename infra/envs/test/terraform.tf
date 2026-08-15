@@ -9,14 +9,18 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.30"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 
-  # TODO(owner): fill in once infra/tf-backend is applied. Storage account
-  # name/container are looked up from the backend outputs; access key is
-  # supplied via ARM_ACCESS_KEY in CI, not committed here.
+  # Fill in resource_group_name / storage_account_name from
+  # infra/tf-backend outputs after that stack is applied manually once.
+  # ARM_ACCESS_KEY is supplied via the environment (CI secret), not here.
   backend "azurerm" {
-    resource_group_name  = ""
-    storage_account_name = ""
+    resource_group_name  = "cst8918-final-project-group-6-tfstate"
+    storage_account_name = "REPLACE_AFTER_TF_BACKEND_APPLY"
     container_name       = "tfstate"
     key                  = "test.terraform.tfstate"
   }

@@ -59,14 +59,35 @@ the itemized list and claim a task before starting a branch.
 ## Running it locally
 
 Once `infra/tf-backend` has been applied by whoever owns it, each
-environment is applied from its own directory:
+environment is applied from its own directory. **Apply `test` before
+`prod`** (prod reads network/ACR from test remote state).
 
 ```sh
-cd infra/envs/test   # or infra/envs/prod
+cd infra/envs/test   # then infra/envs/prod
 terraform init
 terraform plan
 terraform apply
 ```
+
+### First-time apply (empty environments)
+
+The root modules configure the `kubernetes` provider from
+`module.aks.kube_config`, which Terraform only knows after the AKS
+cluster exists. On a brand-new environment, use a two-step apply:
+
+```sh
+# test
+cd infra/envs/test
+terraform apply -target=module.network -target=module.aks
+terraform apply
+
+# prod (after test state exists)
+cd infra/envs/prod
+terraform apply -target=module.aks
+terraform apply
+```
+
+Later applies are a normal single `terraform apply`.
 
 Azure CLI (`az login`) or the GitHub Actions OIDC identity (see
 [docs/task-breakdown.md](docs/task-breakdown.md) item 8) provides the
