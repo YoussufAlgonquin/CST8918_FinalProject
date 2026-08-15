@@ -19,7 +19,7 @@ terraform {
   # stack is applied manually once. ARM_ACCESS_KEY via the environment.
   backend "azurerm" {
     resource_group_name  = "cst8918-final-project-group-6-tfstate"
-    storage_account_name = "REPLACE_AFTER_TF_BACKEND_APPLY"
+    storage_account_name = "cst8918fp6gk0qf0"
     container_name       = "tfstate"
     key                  = "prod.terraform.tfstate"
   }

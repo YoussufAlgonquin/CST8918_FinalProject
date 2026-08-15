@@ -30,7 +30,7 @@ variable "tf_state_resource_group_name" {
 variable "tf_state_storage_account_name" {
   description = "Storage account used for the azurerm backend (from tf-backend output)"
   type        = string
-  default     = "REPLACE_AFTER_TF_BACKEND_APPLY"
+  default     = "cst8918fp6gk0qf0"
 }
 
 variable "tf_state_container_name" {

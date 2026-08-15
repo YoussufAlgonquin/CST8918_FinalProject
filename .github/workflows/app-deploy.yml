@@ -49,7 +49,7 @@ jobs:
     if: github.event_name == 'push'
     name: deploy-prod
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     steps:
       - uses: actions/checkout@v4
 
