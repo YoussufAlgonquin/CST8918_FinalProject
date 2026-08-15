@@ -45,27 +45,6 @@ variable "existing_acr_login_server" {
   default     = null
 }
 
-# --- AKS wiring (outputs from the aks module) ---
-variable "aks_host" {
-  description = "AKS cluster API server endpoint (aks module output)"
-  type        = string
-}
-
-variable "aks_client_certificate" {
-  type      = string
-  sensitive = true
-}
-
-variable "aks_client_key" {
-  type      = string
-  sensitive = true
-}
-
-variable "aks_cluster_ca_certificate" {
-  type      = string
-  sensitive = true
-}
-
 variable "aks_kubelet_identity_object_id" {
   description = "Object ID of the AKS kubelet managed identity, for AcrPull role assignment"
   type        = string
