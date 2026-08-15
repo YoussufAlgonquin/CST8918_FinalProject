@@ -18,8 +18,9 @@ variable "subnet_id" {
 }
 
 variable "kubernetes_version" {
-  type    = string
-  default = "1.32"
+  description = "Assignment spec says 1.32, but Azure has since moved that version to LTS-only (paid Premium tier) - 1.34 is the oldest version still on the free standard support plan as of this apply."
+  type        = string
+  default     = "1.34"
 }
 
 variable "vm_size" {
