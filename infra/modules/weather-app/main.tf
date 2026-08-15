@@ -135,6 +135,15 @@ resource "kubernetes_deployment" "weather_app" {
             }
           }
 
+          readiness_probe {
+            http_get {
+              path = "/"
+              port = 8080
+            }
+            initial_delay_seconds = 5
+            period_seconds        = 10
+          }
+
           resources {
             requests = {
               cpu    = "100m"

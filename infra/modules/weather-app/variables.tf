@@ -21,6 +21,11 @@ variable "acr_name" {
   description = "Globally unique ACR name (alphanumeric only). Required when create_acr is true."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.create_acr ? length(var.acr_name) > 0 : true
+    error_message = "acr_name is required when create_acr = true."
+  }
 }
 
 variable "create_acr" {
@@ -33,12 +38,22 @@ variable "acr_id" {
   description = "Existing ACR resource ID (when create_acr = false)"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.create_acr ? true : var.acr_id != null
+    error_message = "acr_id is required when create_acr = false."
+  }
 }
 
 variable "acr_login_server" {
   description = "Existing ACR login server (when create_acr = false)"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.create_acr ? true : var.acr_login_server != null
+    error_message = "acr_login_server is required when create_acr = false."
+  }
 }
 
 variable "kubelet_identity_object_id" {
